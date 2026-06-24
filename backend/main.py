@@ -5,7 +5,6 @@ main.py — FastAPI application entry point.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 import os
 
 from database import lifespan
@@ -22,14 +21,12 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["GET"],
     allow_headers=["*"],
 )
-
 
 app.include_router(products_router, prefix="/api", tags=["Products"])
 

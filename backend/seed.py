@@ -7,6 +7,7 @@ Strategy: Use executemany with a generator to insert 200,000 rows efficiently.
 
 import asyncio
 import os
+import sys
 import time
 import random
 from datetime import datetime, timedelta, timezone
@@ -47,7 +48,6 @@ async def main() -> None:
 
         if existing > 0:
             print(f"⚠  Table already has {existing:,} rows.")
-            import sys
             if not sys.stdin.isatty() or os.getenv("RENDER") or os.getenv("CI"):
                 print("Non-interactive environment detected. Skipping re-seeding.")
                 return
