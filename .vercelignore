@@ -1,0 +1,6 @@
+# Exclude dev artifacts and compiled files from Vercel deployment
+venv/
+backend/__pycache__/
+**/__pycache__/
+*.pyc
+.env
