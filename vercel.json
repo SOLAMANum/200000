@@ -1,5 +1,10 @@
 {
   "version": 2,
+  "functions": {
+    "api/**/*.py": {
+      "includeFiles": "catalog.db"
+    }
+  },
   "rewrites": [
     { "source": "/api/:path*",    "destination": "/api/index.py" },
     { "source": "/docs",          "destination": "/api/index.py" },
