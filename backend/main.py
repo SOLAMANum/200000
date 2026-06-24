@@ -42,8 +42,4 @@ async def health() -> dict:
 
 _static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.isdir(_static_dir):
-    app.mount("/static", StaticFiles(directory=_static_dir), name="static")
-
-    @app.get("/", include_in_schema=False)
-    async def index():
-        return FileResponse(os.path.join(_static_dir, "index.html"))
+    app.mount("/", StaticFiles(directory=_static_dir, html=True), name="static")

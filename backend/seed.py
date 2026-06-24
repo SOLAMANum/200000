@@ -47,6 +47,10 @@ async def main() -> None:
 
         if existing > 0:
             print(f"⚠  Table already has {existing:,} rows.")
+            import sys
+            if not sys.stdin.isatty() or os.getenv("RENDER") or os.getenv("CI"):
+                print("Non-interactive environment detected. Skipping re-seeding.")
+                return
             answer = input("   Delete all and re-seed? [y/N] ").strip().lower()
             if answer != "y":
                 print("Aborted — no changes made.")
