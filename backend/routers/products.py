@@ -46,9 +46,6 @@ from database import get_pool
 
 router = APIRouter()
 
-# ---------------------------------------------------------------------------
-# Pydantic models
-# ---------------------------------------------------------------------------
 
 class Product(BaseModel):
     id: int
@@ -77,10 +74,6 @@ class CategoryCount(BaseModel):
     count: int
 
 
-# ---------------------------------------------------------------------------
-# Cursor helpers
-# ---------------------------------------------------------------------------
-
 def _encode_cursor(created_at: datetime, row_id: int) -> str:
     """Encode (created_at, id) into a URL-safe opaque cursor string."""
     payload = {
@@ -103,10 +96,6 @@ def _decode_cursor(cursor: str) -> tuple[datetime, int]:
         raise HTTPException(status_code=400, detail=f"Invalid cursor: {exc}") from exc
 
 
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
-
 @router.get("/products", response_model=ProductsResponse)
 async def list_products(
     limit: int = Query(default=20, ge=1, le=100, description="Items per page"),
@@ -122,13 +111,11 @@ async def list_products(
     updating products while browsing will never cause duplicates or skipped rows.
     """
     async with pool.acquire() as conn:
-        # We fetch limit+1 rows so we can tell whether there is a next page
-        # without a separate COUNT query (which would be expensive on 200k rows).
+
         fetch_limit = limit + 1
         args: list[Any] = []
 
         if category and cursor:
-            # Filtered + paginated
             cursor_ts, cursor_id = _decode_cursor(cursor)
             args = [category, cursor_ts.isoformat(), cursor_id, fetch_limit]
             sql = """
@@ -141,7 +128,7 @@ async def list_products(
             """
 
         elif category:
-            # Filtered, first page
+
             args = [category, fetch_limit]
             sql = """
                 SELECT id, name, category, price, created_at, updated_at
@@ -164,7 +151,6 @@ async def list_products(
             """
 
         else:
-            # No filter, first page
             args = [fetch_limit]
             sql = """
                 SELECT id, name, category, price, created_at, updated_at
@@ -176,12 +162,12 @@ async def list_products(
         rows = await conn.execute_fetchall(sql, args)
 
     has_more = len(rows) == fetch_limit
-    page_rows = rows[:limit]  # drop the sentinel row if present
+    page_rows = rows[:limit]  
 
     next_cursor: str | None = None
     if has_more and page_rows:
         last = page_rows[-1]
-        # In SQLite created_at might be returned as a string, parse it if needed
+
         last_dt = datetime.fromisoformat(last["created_at"]) if isinstance(last["created_at"], str) else last["created_at"]
         next_cursor = _encode_cursor(last_dt, last["id"])
 

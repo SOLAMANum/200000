@@ -7,8 +7,8 @@ A high-performance product catalog API for 200,000 products with **stable cursor
 | Layer | Choice |
 |-------|--------|
 | Language | Python 3.12 |
-| Framework | FastAPI + asyncpg |
-| Database | PostgreSQL 16 |
+| Framework | FastAPI + aiosqlite |
+| Database | SQLite |
 
 ---
 
@@ -20,8 +20,8 @@ A high-performance product catalog API for 200,000 products with **stable cursor
 cp .env.example .env   # defaults work out of the box
 ```
 
-### 2. Start PostgreSQL
-Ensure your PostgreSQL database service is running and configured according to the `.env` settings. You will need to create the table structure first by running the commands in `backend/schema.sql` on your database.
+### 2. Database Setup
+The application uses SQLite (`catalog.db`). The schema will be automatically created when you run the seed script.
 
 ### 3. Seed the database
 Run the seeding script locally:
@@ -29,7 +29,7 @@ Run the seeding script locally:
 python backend/seed.py
 ```
 
-This inserts 200,000 rows using a single `INSERT … SELECT generate_series(…)` — entirely server-side, no Python loop. Typical runtime: **2–5 seconds**.
+This inserts 200,000 rows using `executemany` with a generator. Typical runtime: **2–5 seconds**.
 
 ### 4. Open the API docs
 
@@ -170,21 +170,14 @@ EXPLAIN ANALYZE
 
 ## Seed Script
 
-`backend/seed.py` generates 200,000 products in a single SQL statement:
+`backend/seed.py` generates 200,000 products efficiently using SQLite's `executemany`:
 
-```sql
-INSERT INTO products (name, category, price, created_at, updated_at)
-SELECT
-    category || ' Item #' || i,
-    category,
-    round((random() * 998 + 1)::numeric, 2),
-    NOW() - (random() * INTERVAL '730 days'),
-    NOW() - (random() * INTERVAL '30 days')
-FROM generate_series(1, 200000) AS i,
-     (SELECT ARRAY['Electronics','Clothing',...] AS cat_array) AS cats;
+```python
+insert_sql = "INSERT INTO products (name, category, price, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
+await conn.executemany(insert_sql, generate_data())
 ```
 
-No Python loop. No network overhead per row. The DB does all the work.
+This ensures fast seeding without excessive memory overhead.
 
 ---
 
@@ -194,7 +187,7 @@ No Python loop. No network overhead per row. The DB does all the work.
 task-pro/
 ├── backend/
 │   ├── main.py            # FastAPI app, CORS, lifespan
-│   ├── database.py        # asyncpg pool management
+│   ├── database.py        # aiosqlite connection management
 │   ├── routers/
 │   │   └── products.py    # /products and /categories endpoints
 │   ├── seed.py            # One-shot seed script

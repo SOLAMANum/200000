@@ -22,9 +22,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# ---------------------------------------------------------------------------
-# CORS — allow the bundled frontend and local dev servers
-# ---------------------------------------------------------------------------
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -32,9 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------------------------------------------------------------------
-# API routes
-# ---------------------------------------------------------------------------
+
 app.include_router(products_router, prefix="/api", tags=["Products"])
 
 
@@ -43,9 +39,7 @@ async def health() -> dict:
     return {"status": "ok"}
 
 
-# ---------------------------------------------------------------------------
-# Serve the frontend (if the /static directory exists inside the container)
-# ---------------------------------------------------------------------------
+
 _static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.isdir(_static_dir):
     app.mount("/static", StaticFiles(directory=_static_dir), name="static")

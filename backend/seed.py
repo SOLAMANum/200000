@@ -33,7 +33,6 @@ CATEGORIES = [
 async def main() -> None:
     print(f"Connecting to SQLite database: {DATABASE_URL!r}")
     
-    # Ensure schema is created before seeding
     schema_path = os.path.join(os.path.dirname(__file__), "schema.sql")
     with open(schema_path, "r", encoding="utf-8") as f:
         schema_sql = f.read()
@@ -42,7 +41,6 @@ async def main() -> None:
         await conn.executescript(schema_sql)
         await conn.commit()
 
-        # Check existing count
         async with conn.execute("SELECT COUNT(*) FROM products") as cur:
             row = await cur.fetchone()
             existing = row[0] if row else 0
@@ -68,11 +66,9 @@ async def main() -> None:
                 name = f"{category} Item #{i}"
                 price = round(random.uniform(1.0, 999.99), 2)
                 
-                # created_at spread randomly over the past 2 years
                 days_ago = random.uniform(0, 730)
                 created_at = now - timedelta(days=days_ago)
                 
-                # updated_at within the last 30 days
                 updated_days_ago = random.uniform(0, 30)
                 updated_at = now - timedelta(days=updated_days_ago)
                 
@@ -80,7 +76,6 @@ async def main() -> None:
 
         print("Seeding 200,000 products (this might take a few seconds)...")
         
-        # executemany works well for this in sqlite
         insert_sql = "INSERT INTO products (name, category, price, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
         
         await conn.executemany(insert_sql, generate_data())
@@ -94,7 +89,6 @@ async def main() -> None:
             
         print(f"✓  Inserted {final_count:,} rows in {elapsed:.2f}s")
 
-        # Quick sanity check: show category distribution
         print("\nCategory distribution:")
         async with conn.execute("SELECT category, COUNT(*) AS cnt FROM products GROUP BY category ORDER BY cnt DESC") as cur:
             rows = await cur.fetchall()
