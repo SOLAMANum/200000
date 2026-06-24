@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catalog — Browse 200,000 Products</title>
+  <meta name="description" content="Browse a catalog of 200,000 products with instant, stable cursor-based pagination. Filter by category and explore without ever seeing duplicates." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">◈</span>
+        <span class="logo-text">Catalog</span>
+      </div>
+      <div class="header-meta" id="header-meta">200,000 products</div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Controls bar -->
+    <section class="controls" aria-label="Filters and pagination settings">
+      <div class="controls-left">
+        <div class="filter-group">
+          <label class="filter-label" for="category-select">Category</label>
+          <div class="select-wrapper">
+            <select id="category-select" class="select">
+              <option value="">All categories</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label" for="limit-select">Per page</label>
+          <div class="select-wrapper">
+            <select id="limit-select" class="select">
+              <option value="10">10</option>
+              <option value="20" selected>20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="controls-right">
+        <span class="result-count" id="result-count"></span>
+      </div>
+    </section>
+
+    <!-- Product grid -->
+    <section class="grid-section" aria-live="polite" aria-label="Product list">
+      <div class="product-grid" id="product-grid">
+        <!-- Skeletons rendered by JS -->
+      </div>
+    </section>
+
+    <!-- Pagination -->
+    <nav class="pagination" aria-label="Pagination" id="pagination">
+      <button class="btn btn-ghost" id="btn-prev" disabled>← Prev</button>
+      <div class="page-info" id="page-info">Page 1</div>
+      <button class="btn btn-primary" id="btn-next" disabled>Next →</button>
+    </nav>
+
+  </main>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
